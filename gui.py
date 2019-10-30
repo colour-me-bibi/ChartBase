@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
-import sys
+import sys, yaml
 
 
 def window():
@@ -45,4 +45,8 @@ def btnClicked():
 
 
 if __name__ == '__main__':
+    DL_DIR = None
+    with open('config.yaml', 'r') as configFile:
+        if yaml.load(configFile)['DL_DIR'] == None:
+            print(f'{DL_DIR}')
     window()
