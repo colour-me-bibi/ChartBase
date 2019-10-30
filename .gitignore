@@ -1,0 +1,2 @@
+# This file avoids a pylinter bug with PyQt5 
+.pylintrc
