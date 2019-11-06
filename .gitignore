@@ -1,2 +1,11 @@
 # This file avoids a pylinter bug with PyQt5 
 .pylintrc
+
+# Ignore generated python files
+__pycache__/
+
+# Ignore database files
+*.db
+
+# Ignore personal Google Api credentials
+client_secrets.json

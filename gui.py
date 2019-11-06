@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog
 import sys, yaml
+import db
 
 
 def window():
@@ -11,7 +12,7 @@ def window():
     window.setFixedSize(800, 600)
 
     dlChorusBtn = window.findChild(QtWidgets.QPushButton, 'dlChorusBtn')
-    dlChorusBtn.clicked.connect(btnClicked)
+    dlChorusBtn.clicked.connect(downloadFromChours)
 
     dlMasterSheetBtn = window.findChild(
         QtWidgets.QPushButton, 'dlMasterSheetBtn')
@@ -39,9 +40,13 @@ def window():
     window.show()
     sys.exit(app.exec_())
 
+    db.initDB()
 
 def btnClicked():
     print('button was clicked')
+
+def downloadFromChours():
+    pass
 
 
 if __name__ == '__main__':
