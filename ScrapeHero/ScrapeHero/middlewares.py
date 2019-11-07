@@ -6,12 +6,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-from scrapy.http import HtmlResponse
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from ScrapeHero import constant
+
 
 class ScrapeheroSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -74,6 +69,15 @@ class ScrapeheroDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
+        # Called for each request that goes through the downloader
+        # middleware.
+
+        # Must either:
+        # - return None: continue processing this request
+        # - or return a Response object
+        # - or return a Request object
+        # - or raise IgnoreRequest: process_exception() methods of
+        #   installed downloader middleware will be called
         return None
 
     def process_response(self, request, response, spider):

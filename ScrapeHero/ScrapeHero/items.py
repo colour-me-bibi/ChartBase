@@ -7,6 +7,7 @@
 
 import scrapy
 
-class SongItem(scrapy.Item):
-    md5_hash = scrapy.Field()
+
+class ScrapeHeroItem(scrapy.Item):
     url = scrapy.Field()
+    source = scrapy.Field()

@@ -9,3 +9,6 @@ __pycache__/
 
 # Ignore personal Google Api credentials
 client_secrets.json
+
+# Ignore my personal notes for the project
+notes.txt

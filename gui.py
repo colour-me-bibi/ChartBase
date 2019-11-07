@@ -1,13 +1,16 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog
-import sys, yaml
+import sys
+import yaml
 import db
+import os
+import subprocess
 
 
 def window():
     app = QApplication(sys.argv)
     window = QMainWindow()
-    uic.loadUi('ChartBase.ui', window)
+    uic.loadUi('ui/ChartBase.ui', window)
     window.setWindowTitle('ChartBase')
     window.setFixedSize(800, 600)
 
@@ -16,36 +19,67 @@ def window():
 
     dlMasterSheetBtn = window.findChild(
         QtWidgets.QPushButton, 'dlMasterSheetBtn')
-    dlMasterSheetBtn.clicked.connect(btnClicked)
+    dlMasterSheetBtn.clicked.connect(downloadFromMasterSheet)
 
     dlC3Btn = window.findChild(QtWidgets.QPushButton, 'dlC3Btn')
-    dlC3Btn.clicked.connect(btnClicked)
+    dlC3Btn.clicked.connect(downloadFromC3)
 
     unpackBtn = window.findChild(QtWidgets.QPushButton, 'unpackBtn')
-    unpackBtn.clicked.connect(btnClicked)
+    unpackBtn.clicked.connect(unpack)
 
     rmBadBtn = window.findChild(QtWidgets.QPushButton, 'rmBadBtn')
-    rmBadBtn.clicked.connect(btnClicked)
+    rmBadBtn.clicked.connect(removeBad)
 
     convertMidBtn = window.findChild(QtWidgets.QPushButton, 'convertMidBtn')
-    convertMidBtn.clicked.connect(btnClicked)
+    convertMidBtn.clicked.connect(convertMid)
 
     convertSongsBtn = window.findChild(
         QtWidgets.QPushButton, 'convertSongsBtn')
-    convertSongsBtn.clicked.connect(btnClicked)
+    convertSongsBtn.clicked.connect(convertSongs)
 
     chooseDirBtn = window.findChild(QtWidgets.QPushButton, 'chooseDirBtn')
-    chooseDirBtn.clicked.connect(btnClicked)
+    chooseDirBtn.clicked.connect(chooseDir)
 
     window.show()
     sys.exit(app.exec_())
 
     db.initDB()
 
-def btnClicked():
-    print('button was clicked')
 
 def downloadFromChours():
+    # TODO run twisted reactor for ScrapeHero spiders
+    pass
+
+
+def downloadFromMasterSheet():
+    pass
+
+
+def downloadFromC3():
+    pass
+
+
+def unpack():
+    pass
+
+
+def removeBad():
+    pass
+
+
+def downloadFromChours():
+    pass
+
+
+def convertMid():
+    pass
+
+
+def convertSongs():
+    pass
+
+
+def chooseDir():
     pass
 
 
