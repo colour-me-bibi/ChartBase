@@ -5,10 +5,19 @@ def initDB(dbFile='ChartBase.db'):
     with sqlite3.connect(dbFile) as conn:
         c = conn.cursor()
 
-        c.execute("""CREATE TABLE IF NOT EXISTS songs (
+        c.execute("""CREATE TABLE IF NOT EXISTS links (
         url TEXT NOT NULL UNIQUE,
         source TEXT,
         downloaded INTEGER NOT NULL
+        )""")
+
+        c.execute("""CREATE TABLE IF NOT EXISTS songs (
+        name TEXT,
+        url TEXT NOT NULL UNIQUE,
+        source TEXT,
+        hash TEXT,
+        path TEXT,
+        clean INTEGER
         )""")
 
         conn.commit()
