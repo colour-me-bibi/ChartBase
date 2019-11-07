@@ -20,19 +20,21 @@ class LatestspiderSpider(scrapy.Spider):
         self.driver = webdriver.Chrome(chrome_options=options)
 
     def parse(self, response):
+        xPath_SongMeta = "//div[@class='Song__meta']"
+        xPath_CharterLink = "div[@class='Song__charter']//a"
+
         self.driver.get(response.url)
 
         WebDriverWait(self.driver, 5).until(
-            EC.presence_of_element_located((By.XPATH, "//div[@class='Song__meta']")))
+            EC.presence_of_element_located((By.XPATH, xPath_SongMeta)))
 
-        songs = self.driver.find_elements_by_xpath(
-            "//div[@class='Song__meta']")
+        songs = self.driver.find_elements_by_xpath(xPath_SongMeta)
 
         for song in songs:
             item = ScrapeHeroItem()
 
             item['url'] = song.find_element_by_xpath(
-                "div[@class='Song__charter']//a").get_attribute('href')
+                xPath_CharterLink).get_attribute('href')
             item['source'] = 'CHORUS'
 
             yield item
@@ -44,16 +46,15 @@ class LatestspiderSpider(scrapy.Spider):
                 more.click()
 
                 WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located((By.XPATH, "//div[@class='Song__meta']")))
+                    EC.presence_of_element_located((By.XPATH, xPath_SongMeta)))
 
-                songs = self.driver.find_elements_by_xpath(
-                    "//div[@class='Song__meta']")
+                songs = self.driver.find_elements_by_xpath(xPath_SongMeta)
 
                 for song in songs:
                     item = ScrapeHeroItem()
 
                     item['url'] = song.find_element_by_xpath(
-                        "div[@class='Song__charter']//a").get_attribute('href')
+                        xPath_CharterLink).get_attribute('href')
                     item['source'] = 'CHORUS'
 
                     yield item

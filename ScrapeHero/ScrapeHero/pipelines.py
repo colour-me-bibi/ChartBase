@@ -16,7 +16,7 @@ class ScrapeheroPipeline(object):
 
     def process_item(self, item, spider):
         self.cursor.execute(
-            'INSERT INTO songs VALUES (?, ?, ?)', (item['url'], item['source'], 0))
+            'INSERT INTO links VALUES (?, ?, ?)', (item['url'], item['source'], 0))
         self.connection.commit()
 
         logging.log(logging.INFO, f'Item stored: {item}')
