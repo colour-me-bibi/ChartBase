@@ -1,6 +1,12 @@
 # This file avoids a pylinter bug with PyQt5 
 .pylintrc
 
+# This file changes my formatter settings 
+.pep8
+
+# VS Code project settings
+.vscode/
+
 # Ignore generated python files
 __pycache__/
 
@@ -12,3 +18,6 @@ client_secrets.json
 
 # Ignore my personal notes for the project
 notes.txt
+
+# Ignore my personal testing script
+test.py

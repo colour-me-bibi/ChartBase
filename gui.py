@@ -1,10 +1,13 @@
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog
 import sys
 import yaml
 import db
 import os
 import subprocess
+import scrapy
+import threading
+import time
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog
 
 
 def window():
@@ -15,27 +18,14 @@ def window():
     window.setFixedSize(800, 600)
 
     dlChorusBtn = window.findChild(QtWidgets.QPushButton, 'dlChorusBtn')
-    dlChorusBtn.clicked.connect(downloadFromChours)
-
-    dlMasterSheetBtn = window.findChild(
-        QtWidgets.QPushButton, 'dlMasterSheetBtn')
-    dlMasterSheetBtn.clicked.connect(downloadFromMasterSheet)
+    dlChorusBtn.clicked.connect(scrapeFromChours)
 
     dlC3Btn = window.findChild(QtWidgets.QPushButton, 'dlC3Btn')
-    dlC3Btn.clicked.connect(downloadFromC3)
+    dlC3Btn.clicked.connect(scrapeFromC3)
 
-    unpackBtn = window.findChild(QtWidgets.QPushButton, 'unpackBtn')
-    unpackBtn.clicked.connect(unpack)
+    # TODO import songs btn, choose dir
 
-    rmBadBtn = window.findChild(QtWidgets.QPushButton, 'rmBadBtn')
-    rmBadBtn.clicked.connect(removeBad)
-
-    convertMidBtn = window.findChild(QtWidgets.QPushButton, 'convertMidBtn')
-    convertMidBtn.clicked.connect(convertMid)
-
-    convertSongsBtn = window.findChild(
-        QtWidgets.QPushButton, 'convertSongsBtn')
-    convertSongsBtn.clicked.connect(convertSongs)
+    # TODO organize songs btn
 
     chooseDirBtn = window.findChild(QtWidgets.QPushButton, 'chooseDirBtn')
     chooseDirBtn.clicked.connect(chooseDir)
@@ -46,36 +36,16 @@ def window():
     db.initDB()
 
 
-def downloadFromChours():
-    # TODO run twisted reactor for ScrapeHero spiders
+def scrapeFromChours():
     pass
 
 
-def downloadFromMasterSheet():
+def scrapeFromC3():
+    # Write spider
     pass
 
 
-def downloadFromC3():
-    pass
-
-
-def unpack():
-    pass
-
-
-def removeBad():
-    pass
-
-
-def downloadFromChours():
-    pass
-
-
-def convertMid():
-    pass
-
-
-def convertSongs():
+def organizeSongs():
     pass
 
 

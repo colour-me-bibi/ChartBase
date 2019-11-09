@@ -392,16 +392,15 @@ def clean(songsFolder):
                         previewFilePath = itemPath
 
                 if previewFilePath is not None:
-                    previewFileExt = os.path.splitext(previewFilePath)[1]
-                    print(f'renaming preview file: {previewFilePath} -> {os.path.join(songFolderPath, "song" + previewFileExt)}')
-                    os.rename(previewFilePath, os.path.join(songFolderPath, 'song' + previewFileExt))
+                    print(f'removing preview: {previewFilePath}')
+                    os.remove(previewFilePath)
 
-                for item in os.listdir(songFolderPath):
-                    itemPath = os.path.join(songFolderPath, item)
+                    for item in os.listdir(songFolderPath):
+                        itemPath = os.path.join(songFolderPath, item)
 
-                    if item.endswith(('.ogg', '.mp3')) and item != 'song.ogg' and item != 'song.mp3':
-                        print(f'removing other than preview: {itemPath}')
-                        os.remove(itemPath)
+                        if item.endswith(('.ogg', '.mp3')):
+                            newFileName = os.path.join(songFolderPath, 'song' + os.path.splitext(item)[1])
+                            print(f'renaming other than preview: {itemPath} -> {newFileName}')
 
             if hasGoodChart:
                 hasGoodChartFile = False
