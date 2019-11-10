@@ -7,10 +7,12 @@ import os
 import hashlib
 import shutil
 import sqlite3
+import glob
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from pyunpack import Archive
-from pathlib import Path
+from pyunpack import PatoolError
+from random import randint
 
 
 def startDownloads(songsFolder):
@@ -116,8 +118,8 @@ def gDriveDownload(drive, url, folderPath):
 def importDownloaded(songsFolder, url, source, connection):
     cursor = connection.cursor()
 
-    unpack(songsFolder)
-    organizeFolders(songsFolder)
+    unpackAll(songsFolder)
+    bringFoldersUp(songsFolder)
     clean(songsFolder)
 
     def isGoodSong(folderPath):
@@ -170,101 +172,73 @@ def importDownloaded(songsFolder, url, source, connection):
     shutil.rmtree(tmpFolder)
 
 
-def unpack(songsFolder):
+def unpackAll(songsFolder):
     tmpFolder = os.path.join(songsFolder, 'tmp/')
 
     os.chdir(tmpFolder)
 
-    zip_exts = ('.rar', '.zip', '.7z')
+    zips = getZipsRecursively(tmpFolder)
 
-    def getPackedCount(folderPath):
-        packedCount = 0
-        for item in os.listdir(folderPath):
-            itemPath = os.path.join(folderPath, item)
+    while len(zips) > 0:
+        for zipFile in zips:
+            try:
+                print(f'extracting: {zipFile} -> {os.path.dirname(zipFile)}')
+                Archive(zipFile).extractall(os.path.dirname(zipFile))
 
-            if itemPath.endswith(zip_exts):
-                packedCount += 1
-
-        return packedCount
-
-    packedCount = getPackedCount(tmpFolder)
-
-    while packedCount > 0:
-        for item in os.listdir(tmpFolder):
-            itemPath = os.path.join(tmpFolder, item)
-            if item.endswith(zip_exts):
-                try:
-                    print(f'extracting: {itemPath}')
-                    Archive(itemPath).extractall(Path(tmpFolder))
-
-                    print(f'removing: {itemPath}')
-                    os.remove(itemPath)  # TODO should be shutil.rmtree()? currently works...
-                except (NotImplementedError, OSError):
-                    print(f'Cannot unpack {itemPath}')
-
+                print(f'removing extracted: {zipFile}')
+                os.remove(zipFile)
+            except (PatoolError, OSError):
+                if os.path.exists(os.path.join(os.path.basename(zipFile), 'rejects/')):
+                    print(f'removing zip, already exists in rejects: {zipFile}')
+                    os.remove(zipFile)
+                else:
                     rejectsFolder = os.path.join(songsFolder, 'rejects/')
 
                     if not os.path.exists(rejectsFolder):
                         os.mkdir(rejectsFolder)
 
-                    print(f'moving to rejects due to bad zip: {itemPath}')
-
-                    if not os.path.exists(os.path.join(rejectsFolder, item)):
-                        shutil.move(itemPath, rejectsFolder)
-                    else:
-                        os.remove(itemPath)
-        packedCount = getPackedCount(tmpFolder)
+                    print(f'cannot unzip, rejecting: {zipFile}')
+                    shutil.move(zipFile, rejectsFolder)
+        zips = getZipsRecursively(tmpFolder)
 
 
-def organizeFolders(songsFolder):
+def getZipsRecursively(folder):
+    zips = glob.glob(folder + '**/*.zip', recursive=True)
+    zips.extend(glob.glob(folder + '**/*.rar', recursive=True))
+    zips.extend(glob.glob(folder + '**/*.7z', recursive=True))
+    return zips
+
+
+def bringFoldersUp(songsFolder):
     tmpFolder = os.path.join(songsFolder, 'tmp/')
 
     os.chdir(tmpFolder)
 
-    def moveUp(nestedFolder):
-        if dirCount(nestedFolder) == 0:
-            try:
-                shutil.move(nestedFolder, tmpFolder)
-            except:
-                print(f'already exists: {nestedFolder}')
-                shutil.rmtree(nestedFolder)
-        else:
-            for nestedItem in os.listdir(nestedFolder):
-                nestedItemPath = os.path.join(nestedFolder, nestedItem)
+    for item in os.listdir(tmpFolder):
+        itemPath = os.path.join(tmpFolder, item)
 
-                if os.path.isdir(nestedItemPath):
-                    moveUp(nestedItemPath)
+        if os.path.isdir(itemPath):
 
-    def dirCount(folderPath):
-        dirCount = 0
+            for subItem in os.listdir(itemPath):
+                subItemPath = os.path.join(itemPath, subItem)
 
-        for item in os.listdir(folderPath):
-            itemPath = os.path.join(folderPath, item)
+                if os.path.isdir(subItemPath):
+                    subdirList = [x[0] for x in os.walk(subItemPath)]
+                    subdirList.reverse()
 
-            if os.path.isdir(itemPath):
-                dirCount += 1
+                    for subdir in subdirList:
+                        print(f'moving: {subdir} -> {tmpFolder}')
 
-        return dirCount
+                        try:
+                            shutil.move(subdir, tmpFolder)
+                        except shutil.Error:
+                            newName = f'{subdir} ({str(randint(1, 1000000))})'
 
-    def getSubdirCount(folderPath):
-        subdirCount = 0
+                            print(f'renaming already exists: {subdir} -> {newName}')
+                            os.rename(subdir, newName)
 
-        for item in os.listdir(folderPath):
-            itemPath = os.path.join(folderPath, item)
-            if os.path.isdir(itemPath):
-                subdirCount += dirCount(itemPath)
-
-        return subdirCount
-
-    subdirCount = getSubdirCount(tmpFolder)
-
-    while subdirCount > 0:
-        for item in os.listdir(tmpFolder):
-            itemPath = os.path.join(tmpFolder, item)
-
-            if os.path.isdir(itemPath) and dirCount(itemPath) != 0:
-                moveUp(itemPath)
-        subdirCount = getSubdirCount(tmpFolder)
+                            print(f'moving newly named: {newName} -> {tmpFolder}')
+                            shutil.move(newName, tmpFolder)
 
 
 # Removes extra files, empty folders, and renames what's possible
@@ -401,6 +375,7 @@ def clean(songsFolder):
                         if item.endswith(('.ogg', '.mp3')):
                             newFileName = os.path.join(songFolderPath, 'song' + os.path.splitext(item)[1])
                             print(f'renaming other than preview: {itemPath} -> {newFileName}')
+                            os.rename(itemPath, newFileName)
 
             if hasGoodChart:
                 hasGoodChartFile = False
