@@ -145,7 +145,7 @@ def importDownloaded(songsFolder, url, source, connection):
             if not os.path.exists(downloadedFolder):
                 os.mkdir(downloadedFolder)
 
-            newFolderPath = os.path.join(downloadedFolder, folder)
+            newFolderPath = os.path.join(downloadedFolder, os.path.basename(folderPath))
 
             try:
                 cursor.execute('INSERT INTO songs VALUES (?, ?, ?, ?, ?)',
@@ -187,16 +187,16 @@ def unpackAll(songsFolder):
 
                 print(f'removing extracted: {zipFile}')
                 os.remove(zipFile)
-            except (PatoolError, OSError):
-                if os.path.exists(os.path.join(os.path.basename(zipFile), 'rejects/')):
+            except (PatoolError, OSError, NotImplementedError):
+                rejectsFolder = os.path.join(songsFolder, 'rejects/')
+
+                if not os.path.exists(rejectsFolder):
+                    os.mkdir(rejectsFolder)
+
+                if os.path.exists(os.path.join(rejectsFolder, os.path.basename(zipFile))):
                     print(f'removing zip, already exists in rejects: {zipFile}')
                     os.remove(zipFile)
                 else:
-                    rejectsFolder = os.path.join(songsFolder, 'rejects/')
-
-                    if not os.path.exists(rejectsFolder):
-                        os.mkdir(rejectsFolder)
-
                     print(f'cannot unzip, rejecting: {zipFile}')
                     shutil.move(zipFile, rejectsFolder)
         zips = getZipsRecursively(tmpFolder)
@@ -476,3 +476,47 @@ def appendHashToFolder(folderPath):
     os.rename(folderPath, newFolderName)
 
     return (folderHash, newFolderName)
+
+
+def updateDB():
+    connection = sqlite3.connect('../ChartBase.db')
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT hash, path FROM songs')
+
+    songs = cursor.fetchall()
+
+    for song in songs:
+        songHash = song[0]
+        path = song[1]
+
+        if not os.path.exists(path):
+            print(f'does not exist, removing {path}')
+
+            cursor.execute(f'DELETE FROM songs WHERE hash="{songHash}"')
+            connection.commit()
+
+
+def removeBadSongs(badsongsTxt, cloneheroPath, songsFolder):
+
+    CHSongsPath = os.path.join(cloneheroPath, 'Songs/')
+    downloadedFolder = os.path.join(songsFolder, 'downloaded/')
+
+    with open(badsongsTxt) as badsongs:
+        for badsong in badsongs:
+
+            realPath = badsong.strip('\n').replace(CHSongsPath, downloadedFolder)
+
+            print(f'removing: {realPath}')
+            shutil.rmtree(realPath)
+
+    updateDB()
+
+
+def resetDownloads():
+    connection = sqlite3.connect('../ChartBase.db')
+    cursor = connection.cursor()
+
+    cursor.execute('UPDATE links SET downloaded=0 WHERE downloaded=1')
+    cursor.execute('DELETE FROM songs')
+    connection.commit()

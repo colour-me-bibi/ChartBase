@@ -19,5 +19,8 @@ client_secrets.json
 # Ignore my personal notes for the project
 notes.txt
 
+# Don't worry about it
+badsongs.txt
+
 # Ignore my personal testing script
 test.py
